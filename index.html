@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4F6E55">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>게코 다이어리</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234F6E55'/%3E%3Cpath d='M30 65 Q35 45 50 42 Q65 45 70 65 Q65 58 50 56 Q35 58 30 65 Z' fill='%23F1E4CC'/%3E%3Ccircle cx='42' cy='50' r='3' fill='%232B2B28'/%3E%3Ccircle cx='58' cy='50' r='3' fill='%232B2B28'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#F7F6F3;
+    --surface-2:#F1E4CC;
+    --ink:#2B2B28;
+    --ink-soft:#6B6B65;
+    --sage:#6B8F71;
+    --sage-dark:#4F6E55;
+    --tan:#C99B5B;
+    --tan-soft:#F1E4CC;
+    --line:#E5E3DC;
+    --danger:#B85450;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    overscroll-behavior:none;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg);
+    position:relative;
+  }
+  /* Header */
+  header{
+    padding:14px 16px 14px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    z-index:5;
+  }
+  .brand-btn{
+    display:flex;align-items:center;gap:10px;background:none;border:none;
+    padding:4px 6px 4px 2px;border-radius:10px;font-family:inherit;text-align:left;
+  }
+  .brand-btn:active{background:var(--surface);}
+  .brand-btn svg.icon{width:28px;height:28px;flex-shrink:0;}
+  .brand-text h1{font-size:16px;margin:0;font-weight:700;letter-spacing:-0.2px;display:flex;align-items:center;gap:4px;}
+  .brand-text h1 svg.chev{width:13px;height:13px;stroke:var(--ink-soft);}
+  .brand-text p{font-size:11.5px;margin:1px 0 0;color:var(--ink-soft);}
+  header .today{font-size:11.5px;color:var(--ink-soft);text-align:right;white-space:nowrap;}
+
+  main{flex:1;padding:16px 16px 90px;overflow-y:auto;}
+
+  /* Bottom nav */
+  nav.tabbar{
+    position:sticky;
+    bottom:0;
+    display:flex;
+    background:var(--bg);
+    border-top:1px solid var(--line);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    z-index:5;
+  }
+  nav.tabbar button{
+    flex:1;
+    background:none;
+    border:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    padding:6px 0 4px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    font-family:inherit;
+  }
+  nav.tabbar button svg{width:20px;height:20px;}
+  nav.tabbar button.active{color:var(--sage-dark);font-weight:700;}
+  nav.tabbar button.active svg{stroke:var(--sage-dark);}
+
+  h2.section-title{font-size:15px;margin:0 0 12px;font-weight:700;}
+  .muted{color:var(--ink-soft);font-size:12.5px;}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:11px 16px;border-radius:10px;border:none;
+    font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;
+  }
+  .btn-primary{background:var(--sage-dark);color:#fff;}
+  .btn-secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line);}
+  .btn-danger{background:#fff;color:var(--danger);border:1px solid var(--danger);}
+  .btn-block{width:100%;}
+  .btn:disabled{opacity:0.45;cursor:default;}
+
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
+  }
+  label.field-label{font-size:12px;font-weight:700;color:var(--ink-soft);display:block;margin:0 0 6px;}
+  .field{margin-bottom:14px;}
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+
+  /* Setup screen */
+  .setup-wrap{padding-top:20px;}
+  .setup-hero{text-align:center;margin-bottom:24px;}
+  .setup-hero svg{width:56px;height:56px;margin-bottom:10px;}
+  .setup-hero h1{font-size:19px;margin:0 0 6px;}
+  .setup-hero p{font-size:12.5px;color:var(--ink-soft);margin:0;}
+
+  /* Calendar */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .cal-nav .cal-title{font-size:15.5px;font-weight:700;}
+  .cal-nav button{background:var(--surface);border:none;border-radius:8px;width:32px;height:32px;font-size:15px;color:var(--ink);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-dow{font-size:10.5px;color:var(--ink-soft);text-align:center;padding-bottom:6px;font-weight:700;}
+  .cal-cell{
+    aspect-ratio:1/1;border-radius:10px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;position:relative;font-size:12.5px;
+    background:var(--surface);color:var(--ink);border:1px solid transparent;
+  }
+  .cal-cell.empty{background:transparent;}
+  .cal-cell.today{border-color:var(--sage-dark);font-weight:700;}
+  .cal-cell .dot-row{display:flex;gap:2px;position:absolute;bottom:5px;}
+  .dot{width:5px;height:5px;border-radius:50%;}
+  .dot-good{background:var(--sage);}
+  .dot-normal{background:var(--tan);}
+  .dot-caution{background:#D8A13A;}
+  .dot-vet{background:var(--danger);}
+  .dot-photo{background:var(--ink-soft);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:11px;color:var(--ink-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend .dot{width:7px;height:7px;}
+
+  /* Overlay panel */
+  .overlay{
+    position:fixed;inset:0;background:rgba(43,43,40,0.4);z-index:20;
+    display:flex;align-items:flex-end;
+  }
+  .overlay.hidden{display:none;}
+  .panel{
+    background:#fff;width:100%;max-width:480px;margin:0 auto;
+    border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    max-height:88vh;overflow-y:auto;
+  }
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .panel-head h3{font-size:15.5px;margin:0;}
+  .panel-head button{background:none;border:none;font-size:18px;color:var(--ink-soft);padding:4px;}
+
+  .photo-preview{
+    width:100%;height:160px;border-radius:12px;background:var(--surface);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px;
+    border:1px dashed var(--line);
+  }
+  .photo-preview img{width:100%;height:100%;object-fit:cover;}
+  .photo-preview .ph-placeholder{font-size:11.5px;color:var(--ink-soft);}
+  .photo-actions{display:flex;gap:8px;margin-bottom:14px;}
+  .photo-actions label.btn{flex:1;text-align:center;}
+  input[type=file]{display:none;}
+
+  .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;}
+  .checkbox-row input{width:16px;height:16px;}
+
+  .panel-actions{display:flex;gap:8px;margin-top:6px;}
+  .panel-actions .btn{flex:1;}
+
+  /* Gallery */
+  .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .gallery-item{aspect-ratio:1/1;border-radius:10px;overflow:hidden;position:relative;background:var(--surface);}
+  .gallery-item img{width:100%;height:100%;object-fit:cover;}
+  .gallery-item .g-date{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));color:#fff;font-size:9.5px;padding:10px 5px 4px;text-align:center;}
+  .empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+  .empty-state svg{width:44px;height:44px;margin-bottom:10px;opacity:0.6;}
+  .empty-state p{font-size:12.5px;margin:0;}
+
+  /* Graph */
+  .graph-tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .graph-tabs button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-family:inherit;color:var(--ink-soft);}
+  .graph-tabs button.active{background:var(--sage-dark);color:#fff;border-color:var(--sage-dark);font-weight:700;}
+  .chart-box{background:var(--surface);border-radius:14px;padding:12px 6px 8px;}
+  .stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+  .stat-card{background:var(--surface);border-radius:10px;padding:10px 8px;text-align:center;}
+  .stat-card .v{font-size:15px;font-weight:700;}
+  .stat-card .l{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+  .entry-list{margin-top:18px;}
+  .entry-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .entry-row .er-date{color:var(--ink-soft);}
+
+  /* Settings */
+  .settings-group{margin-bottom:22px;}
+  .settings-group h3{font-size:12.5px;color:var(--ink-soft);margin:0 0 10px;text-transform:uppercase;letter-spacing:0.3px;}
+  .danger-box{border:1px solid var(--danger);border-radius:12px;padding:14px;margin-bottom:10px;}
+  .danger-box p{font-size:12px;color:var(--ink-soft);margin:0 0 10px;}
+  .info-box{background:var(--surface);border-radius:12px;padding:14px;}
+  .info-box p{font-size:12px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;}
+  .backup-actions{display:flex;gap:8px;}
+  .backup-actions .btn,.backup-actions label.btn{flex:1;text-align:center;}
+
+  /* Pet switcher / list */
+  .pet-row{
+    display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;
+    border:1px solid var(--line);margin-bottom:8px;background:#fff;
+  }
+  .pet-row.current{border-color:var(--sage-dark);background:var(--surface);}
+  .pet-row .pet-icon{width:36px;height:36px;flex-shrink:0;border-radius:10px;overflow:hidden;}
+  .pet-row .pet-info{flex:1;min-width:0;}
+  .pet-row .pet-info .pn{font-size:13.5px;font-weight:700;}
+  .pet-row .pet-info .ps{font-size:11px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pet-row .badge{font-size:10px;color:var(--sage-dark);font-weight:700;flex-shrink:0;}
+  .pet-manage-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);}
+  .pet-manage-row .pn{flex:1;font-size:13px;}
+  .pet-manage-row button{background:none;border:none;font-size:11.5px;color:var(--ink-soft);padding:4px 6px;}
+  .pet-manage-row button.pm-danger{color:var(--danger);}
+
+  .toast{
+    position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:12.5px;
+    z-index:40;opacity:0;pointer-events:none;transition:opacity .2s;
+    max-width:80%;text-align:center;
+  }
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- IndexedDB layer ---------------- */
+const DB_NAME='geckoTrackerDB', DB_VERSION=2;
+let dbPromise=null;
+function openDB(){
+  if(dbPromise) return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=(e)=>{
+      const db=e.target.result;
+      const oldVersion=e.oldVersion;
+      if(oldVersion<1){
+        if(!db.objectStoreNames.contains('profile')) db.createObjectStore('profile',{keyPath:'id'});
+        if(!db.objectStoreNames.contains('entries')) db.createObjectStore('entries',{keyPath:'date'});
+      }
+      if(oldVersion<2){
+        if(!db.objectStoreNames.contains('pets')) db.createObjectStore('pets',{keyPath:'id'});
+        if(!db.objectStoreNames.contains('entries_v2')) db.createObjectStore('entries_v2',{keyPath:'id'});
+        if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'key'});
+      }
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+  return dbPromise;
+}
+function idbGet(store,key){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    const r=tx.objectStore(store).get(key);
+    r.onsuccess=()=>res(r.result||null);
+    r.onerror=()=>rej(r.error);
+  }));
+}
+function idbPut(store,value){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    tx.objectStore(store).put(value);
+    tx.oncomplete=()=>res(true);
+    tx.onerror=()=>rej(tx.error);
+  }));
+}
+function idbDelete(store,key){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readwrite');
+    tx.objectStore(store).delete(key);
+    tx.oncomplete=()=>res(true);
+    tx.onerror=()=>rej(tx.error);
+  }));
+}
+function idbAll(store){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(store,'readonly');
+    const r=tx.objectStore(store).getAll();
+    r.onsuccess=()=>res(r.result||[]);
+    r.onerror=()=>rej(r.error);
+  }));
+}
+function idbClearAll(){
+  return openDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(['pets','entries_v2','meta'],'readwrite');
+    tx.objectStore('pets').clear();
+    tx.objectStore('entries_v2').clear();
+    tx.objectStore('meta').clear();
+    tx.oncomplete=()=>res(true);
+    tx.onerror=()=>rej(tx.error);
+  }));
+}
+
+/* ---------------- Migration from single-pet v1 schema ---------------- */
+async function migrateIfNeeded(){
+  const pets=await idbAll('pets');
+  if(pets.length>0) return;
+  let oldProfile=null;
+  try{ oldProfile=await idbGet('profile','main'); }catch(e){ oldProfile=null; }
+  if(!oldProfile) return;
+  const petId=genId();
+  const pet={
+    id:petId,
+    name:oldProfile.name||'게코',
+    species:oldProfile.species||'',
+    birthday:oldProfile.birthday||'',
+    weightUnit:oldProfile.weightUnit||'g',
+    lengthUnit:oldProfile.lengthUnit||'cm',
+    createdAt:oldProfile.createdAt||new Date().toISOString()
+  };
+  await idbPut('pets',pet);
+  let oldEntries=[];
+  try{ oldEntries=await idbAll('entries'); }catch(e){ oldEntries=[]; }
+  for(const oe of oldEntries){
+    const ne={
+      id:entryKey(petId,oe.date), petId, date:oe.date,
+      weight:oe.weight??null, length:oe.length??null,
+      condition:oe.condition||'normal', shed:oe.shed||'normal',
+      fed:!!oe.fed, note:oe.note||'', photo:oe.photo||null
+    };
+    await idbPut('entries_v2',ne);
+  }
+  await idbPut('meta',{key:'currentPetId',value:petId});
+}
+
+/* ---------------- State ---------------- */
+const state={
+  pets:[],
+  currentPetId:null,
+  entries:{},        // date -> entry object, for CURRENT pet only
+  currentView:'calendar',
+  calMonth:new Date(),
+  graphMetric:'weight'
+};
+const CONDITIONS=[
+  {v:'good',label:'좋음',dot:'dot-good'},
+  {v:'normal',label:'보통',dot:'dot-normal'},
+  {v:'caution',label:'주의 필요',dot:'dot-caution'},
+  {v:'vet',label:'병원 방문',dot:'dot-vet'}
+];
+const SHEDS=[
+  {v:'normal',label:'평상시'},
+  {v:'signs',label:'탈피 징후'},
+  {v:'shedding',label:'탈피 중'},
+  {v:'done',label:'탈피 완료'}
+];
+function condMeta(v){return CONDITIONS.find(c=>c.v===v)||CONDITIONS[1];}
+function pad2(n){return n<10?'0'+n:''+n;}
+function fmtDate(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function todayStr(){return fmtDate(new Date());}
+function genId(){return 'p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function entryKey(petId,date){return petId+'::'+date;}
+function currentPet(){return state.pets.find(p=>p.id===state.currentPetId)||null;}
+function weightUnit(){const p=currentPet();return p&&p.weightUnit==='oz'?'oz':'g';}
+function lengthUnit(){const p=currentPet();return p&&p.lengthUnit==='in'?'in':'cm';}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1900);
+}
+function escapeHTML(s){
+  return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------------- Icons ---------------- */
+const ICONS={
+  gecko:`<svg class="icon" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" rx="22" fill="#4F6E55"/><path d="M28 66 Q34 44 50 41 Q66 44 72 66 Q64 57 50 55 Q36 57 28 66 Z" fill="#F1E4CC"/><circle cx="41" cy="50" r="3.2" fill="#2B2B28"/><circle cx="59" cy="50" r="3.2" fill="#2B2B28"/></svg>`,
+  calendar:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>`,
+  gallery:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-6-6-4 4-2-2-6 6"/></svg>`,
+  graph:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>`,
+  settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.3 1a7 7 0 0 0-2.1-1.2L14 2h-4l-.5 2.6a7 7 0 0 0-2.1 1.2l-2.3-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.3-1a7 7 0 0 0 2.1 1.2L10 22h4l.5-2.6a7 7 0 0 0 2.1-1.2l2.3 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2Z"/></svg>`,
+  camera:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.3"/></svg>`,
+  chev:`<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>`
+};
+
+/* ---------------- Render root shell ---------------- */
+function renderApp(){
+  const app=document.getElementById('app');
+  if(state.pets.length===0){
+    app.innerHTML=setupScreenHTML();
+    bindSetupScreen();
+    return;
+  }
+  const p=currentPet();
+  app.innerHTML=`
+    <header>
+      <button class="brand-btn" id="brand-btn">
+        ${ICONS.gecko}
+        <div class="brand-text">
+          <h1>${escapeHTML(p.name)} ${ICONS.chev}</h1>
+          <p>${p.species?escapeHTML(p.species):'게코 다이어리'}</p>
+        </div>
+      </button>
+      <div class="today">오늘<br>${todayStr()}</div>
+    </header>
+    <main id="main"></main>
+    <nav class="tabbar">
+      ${navBtn('calendar','캘린더',ICONS.calendar)}
+      ${navBtn('gallery','갤러리',ICONS.gallery)}
+      ${navBtn('graph','그래프',ICONS.graph)}
+      ${navBtn('settings','설정',ICONS.settings)}
+    </nav>
+    <div class="overlay hidden" id="overlay"><div class="panel" id="panel"></div></div>
+  `;
+  document.querySelectorAll('nav.tabbar button').forEach(b=>{
+    b.addEventListener('click',()=>{state.currentView=b.dataset.view;renderMain();});
+  });
+  document.getElementById('brand-btn').addEventListener('click',openPetSwitcher);
+  renderMain();
+}
+function navBtn(view,label,icon){
+  const active=state.currentView===view?'active':'';
+  return `<button class="${active}" data-view="${view}">${icon}<span>${label}</span></button>`;
+}
+
+function renderMain(){
+  document.querySelectorAll('nav.tabbar button').forEach(b=>{
+    b.classList.toggle('active',b.dataset.view===state.currentView);
+  });
+  const main=document.getElementById('main');
+  if(state.currentView==='calendar'){main.innerHTML=calendarHTML();bindCalendar();}
+  else if(state.currentView==='gallery'){main.innerHTML=galleryHTML();bindGallery();}
+  else if(state.currentView==='graph'){main.innerHTML=graphHTML();bindGraph();}
+  else if(state.currentView==='settings'){main.innerHTML=settingsHTML();bindSettings();}
+}
+function openOverlay(){document.getElementById('overlay').classList.remove('hidden');}
+function closeOverlay(){document.getElementById('overlay').classList.add('hidden');}
+
+/* ---------------- Setup screen (no pets yet) ---------------- */
+function setupScreenHTML(){
+  return `
+  <div class="setup-wrap" style="padding:24px 20px;">
+    <div class="setup-hero">
+      ${ICONS.gecko}
+      <h1>반려 게코 등록하기</h1>
+      <p>이름을 입력하면 기록을 시작할 수 있어요</p>
+    </div>
+    <div class="field">
+      <label class="field-label">이름 (필수)</label>
+      <input type="text" id="su-name" placeholder="예: 크레스티">
+    </div>
+    <div class="field">
+      <label class="field-label">종 / 모프 (선택)</label>
+      <input type="text" id="su-species" placeholder="예: 크레스티드 게코 - 릴리화이트">
+    </div>
+    <div class="field">
+      <label class="field-label">생일 또는 분양일 (선택)</label>
+      <input type="date" id="su-birthday">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">체중 단위</label>
+        <select id="su-wunit"><option value="g">g (그램)</option><option value="oz">oz (온스)</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label">길이 단위</label>
+        <select id="su-lunit"><option value="cm">cm (센티미터)</option><option value="in">in (인치)</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" id="su-save">시작하기</button>
+  </div>`;
+}
+function bindSetupScreen(){
+  document.getElementById('su-save').addEventListener('click',async()=>{
+    const name=document.getElementById('su-name').value.trim();
+    if(!name){toast('이름을 입력해 주세요');return;}
+    const petId=genId();
+    const pet={
+      id:petId,
+      name,
+      species:document.getElementById('su-species').value.trim(),
+      birthday:document.getElementById('su-birthday').value,
+      weightUnit:document.getElementById('su-wunit').value,
+      lengthUnit:document.getElementById('su-lunit').value,
+      createdAt:new Date().toISOString()
+    };
+    await idbPut('pets',pet);
+    await idbPut('meta',{key:'currentPetId',value:petId});
+    state.pets=[pet];
+    state.currentPetId=petId;
+    state.entries={};
+    renderApp();
+  });
+}
+
+/* ---------------- Pet switcher & add-pet form ---------------- */
+function openPetSwitcher(){
+  const panel=document.getElementById('panel');
+  panel.innerHTML=`
+    <div class="panel-head">
+      <h3>게코 전환</h3>
+      <button id="panel-close">✕</button>
+    </div>
+    ${state.pets.map(p=>`
+      <div class="pet-row ${p.id===state.currentPetId?'current':''}" data-pet="${p.id}">
+        ${ICONS.gecko.replace('class="icon"','class="icon" style="width:36px;height:36px;"')}
+        <div class="pet-info">
+          <div class="pn">${escapeHTML(p.name)}</div>
+          <div class="ps">${p.species?escapeHTML(p.species):'기록 ' + Object.keys(state.entries).length + '건'}</div>
+        </div>
+        ${p.id===state.currentPetId?'<span class="badge">현재</span>':''}
+      </div>
+    `).join('')}
+    <button class="btn btn-secondary btn-block" id="pet-add-open" style="margin-top:6px;">+ 새 게코 추가</button>
+  `;
+  openOverlay();
+  document.getElementById('panel-close').addEventListener('click',closeOverlay);
+  document.getElementById('overlay').addEventListener('click',(e)=>{if(e.target.id==='overlay') closeOverlay();},{once:true});
+  panel.querySelectorAll('.pet-row').forEach(row=>{
+    row.addEventListener('click',async()=>{
+      const petId=row.dataset.pet;
+      if(petId!==state.currentPetId) await switchPet(petId);
+      closeOverlay();
+      renderApp();
+    });
+  });
+  document.getElementById('pet-add-open').addEventListener('click',openAddPetForm);
+}
+function openAddPetForm(){
+  const panel=document.getElementById('panel');
+  panel.innerHTML=`
+    <div class="panel-head">
+      <h3>새 게코 추가</h3>
+      <button id="panel-close">✕</button>
+    </div>
+    <div class="field">
+      <label class="field-label">이름 (필수)</label>
+      <input type="text" id="ap-name" placeholder="예: 릴리">
+    </div>
+    <div class="field">
+      <label class="field-label">종 / 모프 (선택)</label>
+      <input type="text" id="ap-species" placeholder="예: 크레스티드 게코">
+    </div>
+    <div class="field">
+      <label class="field-label">생일 또는 분양일 (선택)</label>
+      <input type="date" id="ap-birthday">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">체중 단위</label>
+        <select id="ap-wunit"><option value="g">g (그램)</option><option value="oz">oz (온스)</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label">길이 단위</label>
+        <select id="ap-lunit"><option value="cm">cm (센티미터)</option><option value="in">in (인치)</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" id="ap-save">추가하기</button>
+  `;
+  document.getElementById('panel-close').addEventListener('click',closeOverlay);
+  document.getElementById('ap-save').addEventListener('click',async()=>{
+    const name=document.getElementById('ap-name').value.trim();
+    if(!name){toast('이름을 입력해 주세요');return;}
+    const petId=genId();
+    const pet={
+      id:petId,
+      name,
+      species:document.getElementById('ap-species').value.trim(),
+      birthday:document.getElementById('ap-birthday').value,
+      weightUnit:document.getElementById('ap-wunit').value,
+      lengthUnit:document.getElementById('ap-lunit').value,
+      createdAt:new Date().toISOString()
+    };
+    await idbPut('pets',pet);
+    state.pets.push(pet);
+    await switchPet(petId);
+    closeOverlay();
+    toast(`${name} 등록 완료`);
+    renderApp();
+  });
+}
+async function switchPet(petId){
+  state.currentPetId=petId;
+  await idbPut('meta',{key:'currentPetId',value:petId});
+  await loadEntriesForCurrentPet();
+  state.calMonth=new Date();
+  state.currentView='calendar';
+}
+async function loadEntriesForCurrentPet(){
+  const all=await idbAll('entries_v2');
+  state.entries={};
+  all.filter(e=>e.petId===state.currentPetId).forEach(e=>state.entries[e.date]=e);
+}
+
+/* ---------------- Calendar ---------------- */
+function calendarHTML(){
+  const y=state.calMonth.getFullYear(), m=state.calMonth.getMonth();
+  const first=new Date(y,m,1);
+  const startDow=first.getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  let cells='';
+  const dows=['일','월','화','수','목','금','토'];
+  dows.forEach(d=>cells+=`<div class="cal-dow">${d}</div>`);
+  for(let i=0;i<startDow;i++) cells+=`<div class="cal-cell empty"></div>`;
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${y}-${pad2(m+1)}-${pad2(day)}`;
+    const entry=state.entries[dateStr];
+    const isToday=dateStr===todayStr();
+    let dots='';
+    if(entry){
+      dots+=`<div class="dot ${condMeta(entry.condition).dot}"></div>`;
+      if(entry.photo) dots+=`<div class="dot dot-photo"></div>`;
+    }
+    cells+=`<div class="cal-cell ${isToday?'today':''}" data-date="${dateStr}">${day}<div class="dot-row">${dots}</div></div>`;
+  }
+  const monthLabel=`${y}년 ${m+1}월`;
+  return `
+    <div class="cal-nav">
+      <button id="cal-prev">‹</button>
+      <div class="cal-title">${monthLabel}</div>
+      <button id="cal-next">›</button>
+    </div>
+    <div class="cal-grid">${cells}</div>
+    <div class="legend">
+      <span><span class="dot dot-good"></span>좋음</span>
+      <span><span class="dot dot-normal"></span>보통</span>
+      <span><span class="dot dot-caution"></span>주의</span>
+      <span><span class="dot dot-vet"></span>병원</span>
+      <span><span class="dot dot-photo"></span>사진</span>
+    </div>
+  `;
+}
+function bindCalendar(){
+  document.getElementById('cal-prev').addEventListener('click',()=>{
+    state.calMonth=new Date(state.calMonth.getFullYear(),state.calMonth.getMonth()-1,1);
+    renderMain();
+  });
+  document.getElementById('cal-next').addEventListener('click',()=>{
+    state.calMonth=new Date(state.calMonth.getFullYear(),state.calMonth.getMonth()+1,1);
+    renderMain();
+  });
+  document.querySelectorAll('.cal-cell[data-date]').forEach(c=>{
+    c.addEventListener('click',()=>openDayPanel(c.dataset.date));
+  });
+}
+
+/* ---------------- Day entry panel ---------------- */
+function openDayPanel(dateStr){
+  const entry=state.entries[dateStr]||{};
+  const panel=document.getElementById('panel');
+  const [y,mo,da]=dateStr.split('-');
+  panel.innerHTML=`
+    <div class="panel-head">
+      <h3>${y}년 ${parseInt(mo)}월 ${parseInt(da)}일 기록</h3>
+      <button id="panel-close">✕</button>
+    </div>
+    <div class="photo-preview" id="photo-preview">
+      ${entry.photo?`<img src="${entry.photo}">`:'<span class="ph-placeholder">등록된 사진 없음</span>'}
+    </div>
+    <div class="photo-actions">
+      <label class="btn btn-secondary" for="photo-input">사진 선택</label>
+      <input type="file" accept="image/*" id="photo-input">
+      ${entry.photo?'<button class="btn btn-secondary" id="photo-remove">사진 삭제</button>':''}
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">체중 (${weightUnit()})</label>
+        <input type="number" step="0.01" id="f-weight" value="${entry.weight??''}">
+      </div>
+      <div class="field">
+        <label class="field-label">길이 (${lengthUnit()})</label>
+        <input type="number" step="0.1" id="f-length" value="${entry.length??''}">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">컨디션</label>
+      <select id="f-condition">
+        ${CONDITIONS.map(c=>`<option value="${c.v}" ${entry.condition===c.v?'selected':''}>${c.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label">탈피 상태</label>
+      <select id="f-shed">
+        ${SHEDS.map(s=>`<option value="${s.v}" ${entry.shed===s.v?'selected':''}>${s.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="f-fed" ${entry.fed?'checked':''}>
+      <label for="f-fed">오늘 급여함</label>
+    </div>
+    <div class="field">
+      <label class="field-label">메모</label>
+      <textarea id="f-note" rows="3" placeholder="특이사항을 기록하세요">${entry.note?escapeHTML(entry.note):''}</textarea>
+    </div>
+    <div class="panel-actions">
+      ${state.entries[dateStr]?'<button class="btn btn-danger" id="entry-delete">삭제</button>':''}
+      <button class="btn btn-primary" id="entry-save">저장</button>
+    </div>
+  `;
+  openOverlay();
+
+  let pendingPhoto=entry.photo||null;
+
+  document.getElementById('panel-close').addEventListener('click',closeOverlay);
+  document.getElementById('overlay').addEventListener('click',(e)=>{if(e.target.id==='overlay') closeOverlay();},{once:true});
+
+  document.getElementById('photo-input').addEventListener('change',(e)=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    compressImage(file,720,0.6).then(dataUrl=>{
+      pendingPhoto=dataUrl;
+      document.getElementById('photo-preview').innerHTML=`<img src="${dataUrl}">`;
+    });
+  });
+  const removeBtn=document.getElementById('photo-remove');
+  if(removeBtn){
+    removeBtn.addEventListener('click',()=>{
+      pendingPhoto=null;
+      document.getElementById('photo-preview').innerHTML='<span class="ph-placeholder">등록된 사진 없음</span>';
+    });
+  }
+
+  document.getElementById('entry-save').addEventListener('click',async()=>{
+    const weight=document.getElementById('f-weight').value;
+    const length=document.getElementById('f-length').value;
+    const newEntry={
+      id:entryKey(state.currentPetId,dateStr),
+      petId:state.currentPetId,
+      date:dateStr,
+      weight:weight===''?null:parseFloat(weight),
+      length:length===''?null:parseFloat(length),
+      condition:document.getElementById('f-condition').value,
+      shed:document.getElementById('f-shed').value,
+      fed:document.getElementById('f-fed').checked,
+      note:document.getElementById('f-note').value.trim(),
+      photo:pendingPhoto
+    };
+    await idbPut('entries_v2',newEntry);
+    state.entries[dateStr]=newEntry;
+    closeOverlay();
+    toast('저장되었습니다');
+    renderMain();
+  });
+
+  const delBtn=document.getElementById('entry-delete');
+  if(delBtn){
+    delBtn.addEventListener('click',async()=>{
+      if(!confirm('이 날짜의 기록을 삭제할까요?')) return;
+      await idbDelete('entries_v2',entryKey(state.currentPetId,dateStr));
+      delete state.entries[dateStr];
+      closeOverlay();
+      toast('삭제되었습니다');
+      renderMain();
+    });
+  }
+}
+
+function compressImage(file,maxWidth,quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>maxWidth){h=Math.round(h*(maxWidth/w));w=maxWidth;}
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=reject;
+      img.src=reader.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------------- Gallery ---------------- */
+function galleryHTML(){
+  const withPhotos=Object.values(state.entries).filter(e=>e.photo).sort((a,b)=>b.date.localeCompare(a.date));
+  if(withPhotos.length===0){
+    return `<h2 class="section-title">갤러리</h2><div class="empty-state">${ICONS.camera}<p>아직 저장된 사진이 없습니다.<br>캘린더에서 날짜를 선택해 사진을 추가해 보세요.</p></div>`;
+  }
+  return `
+    <h2 class="section-title">갤러리 (${withPhotos.length}장)</h2>
+    <div class="gallery-grid">
+      ${withPhotos.map(e=>`
+        <div class="gallery-item" data-date="${e.date}">
+          <img src="${e.photo}">
+          <div class="g-date">${e.date.slice(5)}</div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+function bindGallery(){
+  document.querySelectorAll('.gallery-item').forEach(g=>{
+    g.addEventListener('click',()=>{
+      const d=new Date(g.dataset.date+'T00:00:00');
+      state.calMonth=new Date(d.getFullYear(),d.getMonth(),1);
+      openDayPanel(g.dataset.date);
+    });
+  });
+}
+
+/* ---------------- Graph ---------------- */
+function graphHTML(){
+  const list=Object.values(state.entries).filter(e=>e[state.graphMetric]!=null&&!isNaN(e[state.graphMetric])).sort((a,b)=>a.date.localeCompare(b.date));
+  const unit=state.graphMetric==='weight'?weightUnit():lengthUnit();
+  let statsHTML='';
+  if(list.length>0){
+    const first=list[0][state.graphMetric], last=list[list.length-1][state.graphMetric];
+    const diff=(last-first);
+    statsHTML=`
+      <div class="stat-cards">
+        <div class="stat-card"><div class="v">${last}${unit}</div><div class="l">최근 기록</div></div>
+        <div class="stat-card"><div class="v">${first}${unit}</div><div class="l">최초 기록</div></div>
+        <div class="stat-card"><div class="v">${diff>=0?'+':''}${diff.toFixed(2)}${unit}</div><div class="l">변화량</div></div>
+      </div>`;
+  }
+  return `
+    <h2 class="section-title">성장 그래프</h2>
+    <div class="graph-tabs">
+      <button data-m="weight" class="${state.graphMetric==='weight'?'active':''}">체중</button>
+      <button data-m="length" class="${state.graphMetric==='length'?'active':''}">길이</button>
+    </div>
+    <div class="chart-box"><canvas id="chart" style="width:100%;height:220px;"></canvas></div>
+    ${list.length===0?`<div class="empty-state">${ICONS.graph}<p>기록된 ${state.graphMetric==='weight'?'체중':'길이'} 데이터가 없습니다.</p></div>`:statsHTML}
+    ${list.length>0?`
+    <div class="entry-list">
+      ${list.slice().reverse().slice(0,10).map(e=>`
+        <div class="entry-row"><span class="er-date">${e.date}</span><span>${e[state.graphMetric]}${unit}</span></div>
+      `).join('')}
+    </div>`:''}
+  `;
+}
+function bindGraph(){
+  document.querySelectorAll('.graph-tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{state.graphMetric=b.dataset.m;renderMain();});
+  });
+  drawChart();
+}
+function drawChart(){
+  const canvas=document.getElementById('chart');
+  if(!canvas) return;
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width*dpr;
+  canvas.height=rect.height*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W=rect.width,H=rect.height;
+  ctx.clearRect(0,0,W,H);
+  const list=Object.values(state.entries).filter(e=>e[state.graphMetric]!=null&&!isNaN(e[state.graphMetric])).sort((a,b)=>a.date.localeCompare(b.date));
+  if(list.length===0) return;
+  const pad={l:36,r:12,t:14,b:22};
+  const vals=list.map(e=>e[state.graphMetric]);
+  let minV=Math.min(...vals),maxV=Math.max(...vals);
+  if(minV===maxV){minV-=1;maxV+=1;}
+  const rangeV=maxV-minV;
+  const plotW=W-pad.l-pad.r, plotH=H-pad.t-pad.b;
+  const xFor=(i)=>pad.l+(list.length===1?plotW/2:plotW*(i/(list.length-1)));
+  const yFor=(v)=>pad.t+plotH-((v-minV)/rangeV)*plotH;
+
+  ctx.strokeStyle='#E5E3DC';ctx.lineWidth=1;ctx.font='10px -apple-system,sans-serif';ctx.fillStyle='#6B6B65';
+  for(let g=0;g<=3;g++){
+    const y=pad.t+plotH*(g/3);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+    const v=maxV-rangeV*(g/3);
+    ctx.fillText(v.toFixed(1),2,y+3);
+  }
+  ctx.fillText(list[0].date.slice(5),pad.l-8,H-6);
+  ctx.fillText(list[list.length-1].date.slice(5),W-pad.r-28,H-6);
+
+  ctx.strokeStyle='#4F6E55';ctx.lineWidth=2;ctx.beginPath();
+  list.forEach((e,i)=>{
+    const x=xFor(i),y=yFor(e[state.graphMetric]);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  ctx.fillStyle='#4F6E55';
+  list.forEach((e,i)=>{
+    const x=xFor(i),y=yFor(e[state.graphMetric]);
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+  });
+}
+
+/* ---------------- Settings ---------------- */
+function settingsHTML(){
+  const p=currentPet();
+  const canDeletePet=state.pets.length>1;
+  return `
+    <h2 class="section-title">설정</h2>
+    <div class="settings-group">
+      <h3>현재 게코 정보 — ${escapeHTML(p.name)}</h3>
+      <div class="field">
+        <label class="field-label">이름</label>
+        <input type="text" id="st-name" value="${escapeHTML(p.name)}">
+      </div>
+      <div class="field">
+        <label class="field-label">종 / 모프</label>
+        <input type="text" id="st-species" value="${escapeHTML(p.species||'')}">
+      </div>
+      <div class="field">
+        <label class="field-label">생일 / 분양일</label>
+        <input type="date" id="st-birthday" value="${p.birthday||''}">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">체중 단위</label>
+          <select id="st-wunit">
+            <option value="g" ${p.weightUnit==='g'?'selected':''}>g (그램)</option>
+            <option value="oz" ${p.weightUnit==='oz'?'selected':''}>oz (온스)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">길이 단위</label>
+          <select id="st-lunit">
+            <option value="cm" ${p.lengthUnit==='cm'?'selected':''}>cm (센티미터)</option>
+            <option value="in" ${p.lengthUnit==='in'?'selected':''}>in (인치)</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" id="st-save">이 게코 정보 저장</button>
+    </div>
+
+    <div class="settings-group">
+      <h3>게코 관리 (${state.pets.length}마리)</h3>
+      ${state.pets.map(pt=>`
+        <div class="pet-manage-row">
+          <span class="pn">${escapeHTML(pt.name)}${pt.id===state.currentPetId?' · 현재':''}</span>
+          ${pt.id!==state.currentPetId?`<button data-switch="${pt.id}">전환</button>`:''}
+        </div>
+      `).join('')}
+      <button class="btn btn-secondary btn-block" id="st-add-pet" style="margin-top:10px;">+ 새 게코 추가</button>
+    </div>
+
+    <div class="settings-group">
+      <h3>백업 및 복원</h3>
+      <div class="info-box">
+        <p>기록은 이 휴대폰 안에만 저장됩니다. 휴대폰을 바꿀 경우 자동으로 옮겨지지 않으니, 교체 전 백업 파일을 내보낸 뒤 새 휴대폰에서 이 앱 파일을 열고 가져오기를 실행하세요.</p>
+        <div class="backup-actions">
+          <button class="btn btn-secondary" id="st-export">백업 내보내기</button>
+          <label class="btn btn-secondary" for="st-import-file">백업 가져오기</label>
+          <input type="file" accept="application/json" id="st-import-file">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>데이터 삭제</h3>
+      <div class="danger-box">
+        <p>${canDeletePet?`현재 게코(${escapeHTML(p.name)})의 기록과 사진을 모두 삭제합니다.`:'게코가 1마리뿐일 때는 이 게코만 삭제할 수 없습니다. 아래 전체 초기화를 사용하세요.'}</p>
+        <button class="btn btn-danger btn-block" id="st-delete-pet" ${canDeletePet?'':'disabled'}>이 게코 삭제</button>
+      </div>
+      <div class="danger-box">
+        <p>전체 데이터 초기화는 되돌릴 수 없습니다. 등록된 게코 ${state.pets.length}마리와 모든 기록, 사진이 삭제됩니다.</p>
+        <button class="btn btn-danger btn-block" id="st-reset">전체 데이터 초기화</button>
+      </div>
+    </div>
+  `;
+}
+function bindSettings(){
+  document.getElementById('st-save').addEventListener('click',async()=>{
+    const name=document.getElementById('st-name').value.trim();
+    if(!name){toast('이름을 입력해 주세요');return;}
+    const p=currentPet();
+    const updated={
+      ...p,
+      name,
+      species:document.getElementById('st-species').value.trim(),
+      birthday:document.getElementById('st-birthday').value,
+      weightUnit:document.getElementById('st-wunit').value,
+      lengthUnit:document.getElementById('st-lunit').value
+    };
+    await idbPut('pets',updated);
+    const idx=state.pets.findIndex(x=>x.id===updated.id);
+    state.pets[idx]=updated;
+    toast('저장되었습니다');
+    renderApp();
+  });
+
+  document.getElementById('st-add-pet').addEventListener('click',()=>{
+    openOverlay();
+    openAddPetForm();
+  });
+
+  document.querySelectorAll('[data-switch]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      await switchPet(btn.dataset.switch);
+      renderApp();
+    });
+  });
+
+  document.getElementById('st-export').addEventListener('click',exportData);
+  document.getElementById('st-import-file').addEventListener('change',(e)=>{
+    const file=e.target.files[0];
+    if(file) importDataFile(file);
+    e.target.value='';
+  });
+
+  const delPetBtn=document.getElementById('st-delete-pet');
+  if(delPetBtn && !delPetBtn.disabled){
+    delPetBtn.addEventListener('click',async()=>{
+      const p=currentPet();
+      if(!confirm(`${p.name}의 모든 기록과 사진을 삭제할까요? 되돌릴 수 없습니다.`)) return;
+      await deletePet(p.id);
+      toast('삭제되었습니다');
+      renderApp();
+    });
+  }
+
+  document.getElementById('st-reset').addEventListener('click',async()=>{
+    if(!confirm('정말 모든 게코와 데이터를 삭제할까요?')) return;
+    if(!confirm('이 작업은 되돌릴 수 없습니다. 다시 한번 확인해 주세요.')) return;
+    await idbClearAll();
+    state.pets=[];
+    state.currentPetId=null;
+    state.entries={};
+    renderApp();
+  });
+}
+async function deletePet(petId){
+  await idbDelete('pets',petId);
+  const all=await idbAll('entries_v2');
+  for(const e of all.filter(e=>e.petId===petId)){
+    await idbDelete('entries_v2',e.id);
+  }
+  state.pets=state.pets.filter(p=>p.id!==petId);
+  if(state.currentPetId===petId){
+    const next=state.pets[0]||null;
+    state.currentPetId=next?next.id:null;
+    await idbPut('meta',{key:'currentPetId',value:state.currentPetId||''});
+    if(state.currentPetId) await loadEntriesForCurrentPet();
+    else state.entries={};
+  }
+}
+
+/* ---------------- Backup export / import ---------------- */
+async function exportData(){
+  const pets=await idbAll('pets');
+  const entries=await idbAll('entries_v2');
+  const payload={app:'gecko-tracker',version:2,exportedAt:new Date().toISOString(),pets,entries};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`gecko-backup-${todayStr()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast('백업 파일을 저장했습니다');
+}
+async function importDataFile(file){
+  try{
+    const text=await file.text();
+    const data=JSON.parse(text);
+    if(!data||!Array.isArray(data.pets)||!Array.isArray(data.entries)) throw new Error('invalid backup format');
+    const ok=confirm(`백업 파일에서 게코 ${data.pets.length}마리, 기록 ${data.entries.length}건을 가져옵니다.\n같은 게코/날짜 기록은 덮어씌워집니다. 계속할까요?`);
+    if(!ok) return;
+    for(const p of data.pets) await idbPut('pets',p);
+    for(const e of data.entries) await idbPut('entries_v2',e);
+    state.pets=await idbAll('pets');
+    if(!state.currentPetId && state.pets.length>0){
+      state.currentPetId=state.pets[0].id;
+      await idbPut('meta',{key:'currentPetId',value:state.currentPetId});
+    }
+    if(state.currentPetId) await loadEntriesForCurrentPet();
+    toast('가져오기가 완료되었습니다');
+    renderApp();
+  }catch(err){
+    toast('올바른 백업 파일이 아닙니다');
+  }
+}
+
+/* ---------------- Init ---------------- */
+async function init(){
+  await migrateIfNeeded();
+  state.pets=await idbAll('pets');
+  let cur=null;
+  try{ cur=await idbGet('meta','currentPetId'); }catch(e){ cur=null; }
+  if(cur && cur.value && state.pets.find(p=>p.id===cur.value)){
+    state.currentPetId=cur.value;
+  }else if(state.pets.length>0){
+    state.currentPetId=state.pets[0].id;
+    await idbPut('meta',{key:'currentPetId',value:state.currentPetId});
+  }
+  if(state.currentPetId) await loadEntriesForCurrentPet();
+  renderApp();
+}
+init();
+</script>
+</body>
+</html>
