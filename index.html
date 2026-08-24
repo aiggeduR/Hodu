@@ -22,6 +22,9 @@
     --tan-soft:#F1E4CC;
     --line:#E5E3DC;
     --danger:#B85450;
+    --shed-signs:#B7C7DE;
+    --shed-progress:#5B7FA6;
+    --shed-done:#33506E;
     --radius:14px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -144,10 +147,16 @@
   .dot-caution{background:#D8A13A;}
   .dot-vet{background:var(--danger);}
   .dot-photo{background:var(--ink-soft);}
+  .cal-cell .shed-mark{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;box-sizing:border-box;}
+  .shed-signs{background:#fff;border:1.6px solid var(--shed-signs);}
+  .shed-progress{background:var(--shed-progress);}
+  .shed-done{background:var(--shed-done);}
 
-  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:11px;color:var(--ink-soft);}
-  .legend span{display:inline-flex;align-items:center;gap:5px;}
-  .legend .dot{width:7px;height:7px;}
+  .legend{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+  .legend-row{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--ink-soft);}
+  .legend-row .legend-label{font-weight:700;color:var(--ink);margin-right:2px;}
+  .legend-row span.item{display:inline-flex;align-items:center;gap:5px;}
+  .legend-row .dot,.legend-row .shed-mark{width:7px;height:7px;position:static;}
 
   /* Overlay panel */
   .overlay{
@@ -365,6 +374,12 @@ const SHEDS=[
   {v:'done',label:'탈피 완료'}
 ];
 function condMeta(v){return CONDITIONS.find(c=>c.v===v)||CONDITIONS[1];}
+function shedMarkHTML(shed){
+  if(shed==='signs') return '<div class="shed-mark shed-signs"></div>';
+  if(shed==='shedding') return '<div class="shed-mark shed-progress"></div>';
+  if(shed==='done') return '<div class="shed-mark shed-done"></div>';
+  return '';
+}
 function pad2(n){return n<10?'0'+n:''+n;}
 function fmtDate(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
 function todayStr(){return fmtDate(new Date());}
@@ -619,11 +634,13 @@ function calendarHTML(){
     const entry=state.entries[dateStr];
     const isToday=dateStr===todayStr();
     let dots='';
+    let shedMark='';
     if(entry){
       dots+=`<div class="dot ${condMeta(entry.condition).dot}"></div>`;
       if(entry.photo) dots+=`<div class="dot dot-photo"></div>`;
+      shedMark=shedMarkHTML(entry.shed);
     }
-    cells+=`<div class="cal-cell ${isToday?'today':''}" data-date="${dateStr}">${day}<div class="dot-row">${dots}</div></div>`;
+    cells+=`<div class="cal-cell ${isToday?'today':''}" data-date="${dateStr}">${day}${shedMark}<div class="dot-row">${dots}</div></div>`;
   }
   const monthLabel=`${y}년 ${m+1}월`;
   return `
@@ -634,11 +651,20 @@ function calendarHTML(){
     </div>
     <div class="cal-grid">${cells}</div>
     <div class="legend">
-      <span><span class="dot dot-good"></span>좋음</span>
-      <span><span class="dot dot-normal"></span>보통</span>
-      <span><span class="dot dot-caution"></span>주의</span>
-      <span><span class="dot dot-vet"></span>병원</span>
-      <span><span class="dot dot-photo"></span>사진</span>
+      <div class="legend-row">
+        <span class="legend-label">컨디션</span>
+        <span class="item"><span class="dot dot-good"></span>좋음</span>
+        <span class="item"><span class="dot dot-normal"></span>보통</span>
+        <span class="item"><span class="dot dot-caution"></span>주의</span>
+        <span class="item"><span class="dot dot-vet"></span>병원</span>
+        <span class="item"><span class="dot dot-photo"></span>사진</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-label">탈피</span>
+        <span class="item"><span class="shed-mark shed-signs"></span>징후</span>
+        <span class="item"><span class="shed-mark shed-progress"></span>진행중</span>
+        <span class="item"><span class="shed-mark shed-done"></span>완료</span>
+      </div>
     </div>
   `;
 }
